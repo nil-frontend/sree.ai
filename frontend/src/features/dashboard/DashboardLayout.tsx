@@ -26,9 +26,20 @@ export const DashboardLayout: React.FC<{
   }, [setIsCollapsed, setSidebarCollapsed]);
 
   React.useEffect(() => {
-    if (defaultCollapsed !== undefined) {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setSidebarCollapsed(true);
+      }
+    };
+
+    if (window.innerWidth <= 768) {
+      setSidebarCollapsed(true);
+    } else if (defaultCollapsed !== undefined) {
       setSidebarCollapsed(defaultCollapsed);
     }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [defaultCollapsed, setSidebarCollapsed]);
 
   // Swipe gesture detection to slide open and close the sidebar
