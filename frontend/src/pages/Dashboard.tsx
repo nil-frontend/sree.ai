@@ -816,9 +816,9 @@ const Dashboard: React.FC = () => {
                     <Wand2 size={16} />
                   </div>
                   <div className={styles.microToolInfo}>
-                    <div className="flex items-center gap-2">
+                    <div className={styles.microToolHeader}>
                       <span className={styles.microToolTitle}>Prompt Enhancer</span>
-                      <Badge variant="purple" className="text-[10px] py-0 px-1.5">
+                      <Badge variant="purple" className={styles.microToolBadge}>
                         POPULAR
                       </Badge>
                     </div>
@@ -839,9 +839,9 @@ const Dashboard: React.FC = () => {
                     <Sparkles size={16} />
                   </div>
                   <div className={styles.microToolInfo}>
-                    <div className="flex items-center gap-2">
+                    <div className={styles.microToolHeader}>
                       <span className={styles.microToolTitle}>AI Humanizer</span>
-                      <Badge variant="success" className="text-[10px] py-0 px-1.5">
+                      <Badge variant="success" className={styles.microToolBadge}>
                         STARTER
                       </Badge>
                     </div>
@@ -862,9 +862,9 @@ const Dashboard: React.FC = () => {
                     <FileSearch size={16} />
                   </div>
                   <div className={styles.microToolInfo}>
-                    <div className="flex items-center gap-2">
+                    <div className={styles.microToolHeader}>
                       <span className={styles.microToolTitle}>Doc Analyzer</span>
-                      <Badge variant="default" className="text-[10px] py-0 px-1.5">
+                      <Badge variant="default" className={styles.microToolBadge}>
                         NEW
                       </Badge>
                     </div>
@@ -885,9 +885,9 @@ const Dashboard: React.FC = () => {
                     <Box size={16} />
                   </div>
                   <div className={styles.microToolInfo}>
-                    <div className="flex items-center gap-2">
+                    <div className={styles.microToolHeader}>
                       <span className={styles.microToolTitle}>2D to 3D Concept</span>
-                      <Badge variant="purple" className="text-[10px] py-0 px-1.5">
+                      <Badge variant="purple" className={styles.microToolBadge}>
                         PRO
                       </Badge>
                     </div>
@@ -901,10 +901,10 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Right Column: Recent Activity Hub */}
-          <div className={styles.activityPanel}>
-            <div className={styles.activityHeader}>
-              <div className="flex items-center gap-2">
-                <span className={styles.sectionTitle}>Recent Activity</span>
+          <div className={styles.rightColumn}>
+            <div className={styles.studiosHeader}>
+              <div className={styles.sectionTitleGroup}>
+                <h3 className={styles.sectionTitle}>Recent Activity</h3>
                 <Badge variant="secondary">{allActivities.length}</Badge>
               </div>
 
@@ -919,29 +919,30 @@ const Dashboard: React.FC = () => {
               </Button>
             </div>
 
-            {/* Title Search Input */}
-            <div className={styles.activitySearchBox}>
-              <Search size={15} className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search recent activity by title or prompt..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
-            </div>
+            <div className={styles.activityPanel}>
+              {/* Title Search Input */}
+              <div className={styles.activitySearchBox}>
+                <Search size={15} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search recent activity by title or prompt..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
 
-            {/* Filter Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-5 w-full">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="voice">Voice</TabsTrigger>
-                <TabsTrigger value="image">Image</TabsTrigger>
-                <TabsTrigger value="video">Video</TabsTrigger>
-              </TabsList>
+              {/* Filter Tabs */}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className={styles.activityTabs}>
+                <TabsList className="grid grid-cols-5 w-full">
+                  <TabsTrigger value="all">All</TabsTrigger>
+                  <TabsTrigger value="chat">Chat</TabsTrigger>
+                  <TabsTrigger value="voice">Voice</TabsTrigger>
+                  <TabsTrigger value="image">Image</TabsTrigger>
+                  <TabsTrigger value="video">Video</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value={activeTab} className="mt-3">
+                <TabsContent value={activeTab} className={styles.activityTabsContent}>
                 <div className={styles.activityList}>
                   {conversationsLoading && allActivities.length === 0 ? (
                     <div className="space-y-2 p-2">
@@ -1086,8 +1087,9 @@ const Dashboard: React.FC = () => {
                     })
                   )}
                 </div>
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
 
@@ -1137,7 +1139,7 @@ const Dashboard: React.FC = () => {
               <p className={styles.emptyStateSub}>
                 Launch the Image or Video Studio to synthesize photorealistic visuals, 4K concepts, and cinematic animations.
               </p>
-              <div className="flex items-center gap-3 mt-3">
+              <div className={styles.galleryEmptyActions}>
                 <Button
                   variant="glow"
                   size="sm"
