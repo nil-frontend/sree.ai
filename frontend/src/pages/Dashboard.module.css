@@ -52,6 +52,12 @@
   flex-wrap: wrap;
 }
 
+.heroTopRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .systemStatus {
   display: inline-flex;
   align-items: center;
@@ -63,6 +69,20 @@
   font-size: 0.75rem;
   font-weight: 500;
   color: #34d399;
+}
+
+.statusTextFull {
+  display: inline;
+}
+
+.statusTextShort {
+  display: none;
+}
+
+.heroTierBadge {
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  font-weight: 600;
 }
 
 .statusDot {
@@ -1033,39 +1053,93 @@
   }
 
   .heroCard {
-    padding: 20px 16px;
+    padding: 16px 14px;
     border-radius: 18px;
   }
 
   .heroTopRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 16px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+    width: 100%;
+    flex-wrap: nowrap;
   }
 
   .heroStatusPills {
-    width: 100%;
-    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .statusTextFull {
+    display: none;
+  }
+
+  .statusTextShort {
+    display: inline;
+  }
+
+  .systemStatus {
+    padding: 3px 8px;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    gap: 5px;
+  }
+
+  .heroTierBadge {
+    font-size: 0.625rem !important;
+    padding: 2px 7px !important;
+    white-space: nowrap;
+  }
+
+  .dateDisplay {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    gap: 4px;
+    white-space: nowrap;
+    color: #8a8a8a;
   }
 
   .heroMain {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 12px;
   }
 
   .heroUserArea {
     gap: 12px;
     width: 100%;
+    align-items: center;
+  }
+
+  .userAvatar,
+  .guestAvatar {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+  }
+
+  .guestAvatarIcon {
+    width: 20px;
+    height: 20px;
   }
 
   .greetingTitle {
-    font-size: 1.375rem;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    margin: 0;
   }
 
   .greetingSub {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
+    color: #8a8a8a;
+    line-height: 1.35;
+    margin-top: 2px;
   }
 
   .quickActionsBar {
@@ -1073,10 +1147,22 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+    margin-top: 2px;
   }
 
   .quickActionsBar button:first-child {
     grid-column: span 2;
+    height: 42px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .quickActionsBar button:nth-child(2),
+  .quickActionsBar button:nth-child(3) {
+    grid-column: span 1;
+    height: 38px;
+    font-size: 0.8125rem;
+    font-weight: 500;
   }
 
   .sectionHeader {
@@ -1332,15 +1418,5 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-  }
-}
-
-@media (max-width: 480px) {
-  .quickActionsBar {
-    grid-template-columns: 1fr;
-  }
-
-  .quickActionsBar button:first-child {
-    grid-column: span 1;
   }
 }

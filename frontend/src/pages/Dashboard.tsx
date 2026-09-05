@@ -299,7 +299,8 @@ const Dashboard: React.FC = () => {
             <div className={styles.heroStatusPills}>
               <span className={styles.systemStatus}>
                 <span className={styles.statusDot} />
-                All Systems Operational
+                <span className={styles.statusTextFull}>All Systems Operational</span>
+                <span className={styles.statusTextShort}>Operational</span>
               </span>
               <Badge
                 variant={
@@ -309,13 +310,14 @@ const Dashboard: React.FC = () => {
                     ? 'secondary'
                     : 'amber'
                 }
+                className={styles.heroTierBadge}
               >
                 {userTier} PLAN
               </Badge>
             </div>
 
             <div className={styles.dateDisplay}>
-              <Clock size={14} />
+              <Clock size={13} />
               <span>{formattedDate}</span>
             </div>
           </div>
@@ -324,18 +326,18 @@ const Dashboard: React.FC = () => {
             <div className={styles.heroUserArea}>
               {isGuest ? (
                 <div className={styles.guestAvatar}>
-                  <User size={24} strokeWidth={2} className={styles.guestAvatarIcon} />
+                  <User size={22} strokeWidth={2} className={styles.guestAvatarIcon} />
                 </div>
               ) : user?.avatar_url ? (
                 <Avatar className={styles.userAvatar}>
                   <AvatarImage src={user.avatar_url} alt={userName} />
                   <AvatarFallback>
-                    <User size={24} strokeWidth={2} className={styles.guestAvatarIcon} />
+                    <User size={22} strokeWidth={2} className={styles.guestAvatarIcon} />
                   </AvatarFallback>
                 </Avatar>
               ) : (
                 <div className={styles.guestAvatar}>
-                  <User size={24} strokeWidth={2} className={styles.guestAvatarIcon} />
+                  <User size={22} strokeWidth={2} className={styles.guestAvatarIcon} />
                 </div>
               )}
 
@@ -346,10 +348,10 @@ const Dashboard: React.FC = () => {
                 </h1>
                 <p className={styles.greetingSub}>
                   {user
-                    ? `Your multi-modal intelligence workspace is primed. Active engine: ${
+                    ? `Workspace primed • Active engine: ${
                         selectedModel?.name || 'Groq Compound Mini'
-                      }.`
-                    : 'Experience next-generation multi-modal AI infrastructure. Sign in to retain persistent telemetry.'}
+                      }`
+                    : 'Ready to create • Multi-modal workspace primed'}
                 </p>
               </div>
             </div>
