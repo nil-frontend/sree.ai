@@ -793,7 +793,7 @@ const ChatPage: React.FC = () => {
         return `${greeting}, ${name}`;
       }
     }
-    return greeting;
+    return greeting + " Bro !";
   }, [user]);
 
   const suggestions = [
