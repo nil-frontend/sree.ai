@@ -65,6 +65,13 @@ export const LoginForm: React.FC = () => {
     try {
       localStorage.setItem('last_login_method', provider);
 
+      // Persist TOS & Privacy acceptance intent before OAuth redirect.
+      // Safe to do on the Login page: auth.store.ts now has a DB guard
+      // to ensure this only writes if the user doesn't already have it (i.e. is a new user).
+      const now = new Date().toISOString();
+      localStorage.setItem('pending_tos_accepted', 'true');
+      localStorage.setItem('pending_tos_accepted_at', now);
+
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -189,6 +196,16 @@ export const LoginForm: React.FC = () => {
         <div className="auth-footer">
           Don't have an account?
           <Link to="/signup" className="auth-link">Create Account</Link>
+          <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-tertiary)', lineHeight: '1.5' }}>
+            By continuing, you agree to our{' '}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="auth-link" style={{ marginLeft: 0 }}>
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="auth-link" style={{ marginLeft: 0 }}>
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </form>
     </div>

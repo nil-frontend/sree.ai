@@ -13,6 +13,7 @@ export const SignupForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [tosAccepted, setTosAccepted] = useState(false);
+  const [tosHighlight, setTosHighlight] = useState(false);
   const [lastMethod, setLastMethod] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ export const SignupForm: React.FC = () => {
 
     if (!tosAccepted) {
       setError('You must accept the Terms of Service and Privacy Policy to continue.');
+      setTosHighlight(true);
       setLoading(false);
       return;
     }
@@ -73,15 +75,28 @@ export const SignupForm: React.FC = () => {
 
       if (signUpError) throw signUpError;
 
-      // Save TOS & Privacy acceptance to profile
+      // Save TOS & Privacy acceptance to profile.
+      // IMPORTANT: Supabase creates the profile row via a DB trigger AFTER signUp() returns.
+      // We must retry the update until the row exists (trigger latency is ~100-800ms).
       if (data?.user?.id) {
         const now = new Date().toISOString();
-        await supabase.from('profiles').update({
-          tos_accepted: true,
-          tos_accepted_at: now,
-          privacy_accepted: true,
-          privacy_accepted_at: now,
-        }).eq('id', data.user.id);
+        const userId = data.user.id;
+        let saved = false;
+        for (let attempt = 0; attempt < 5; attempt++) {
+          if (attempt > 0) await new Promise(r => setTimeout(r, 600));
+          const { error: tosError } = await supabase
+            .from('profiles')
+            .update({
+              tos_accepted: true,
+              tos_accepted_at: now,
+              privacy_accepted: true,
+              privacy_accepted_at: now,
+            })
+            .eq('id', userId)
+            .eq('tos_accepted', false); // only update if not already accepted
+          if (!tosError) { saved = true; break; }
+        }
+        if (!saved) console.warn('[SignupForm] Could not write TOS acceptance after retries.');
       }
 
       setSuccess(true);
@@ -94,8 +109,25 @@ export const SignupForm: React.FC = () => {
   const handleOAuthSignup = async (provider: 'google' | 'github') => {
     setLoading(true);
     setError(null);
+
+    // Enforce explicit TOS checkbox acceptance even for OAuth
+    if (!tosAccepted) {
+      setError('You must accept the Terms of Service and Privacy Policy to continue.');
+      setTosHighlight(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       localStorage.setItem('last_login_method', provider);
+
+      // Persist TOS & Privacy acceptance intent before OAuth redirect.
+      // The page unloads during redirect, so we save to localStorage for auth.store to pick up.
+      // By clicking Google/GitHub on the signup page, the user implicitly accepts TOS
+      // (same as Vercel, Notion, etc. — Google consent screen shows the TOS/Privacy links).
+      const now = new Date().toISOString();
+      localStorage.setItem('pending_tos_accepted', 'true');
+      localStorage.setItem('pending_tos_accepted_at', now);
 
       const { error: authError } = await supabase.auth.signInWithOAuth({
         provider,
@@ -272,7 +304,8 @@ export const SignupForm: React.FC = () => {
             cursor: 'pointer',
             marginBottom: '18px',
             fontSize: '0.8rem',
-            color: 'var(--text-secondary)',
+            color: tosHighlight ? '#ef4444' : 'var(--text-secondary)',
+            transition: 'color 0.2s',
             lineHeight: 1.5,
           }}
         >
@@ -280,7 +313,10 @@ export const SignupForm: React.FC = () => {
             id="tos-checkbox"
             type="checkbox"
             checked={tosAccepted}
-            onChange={(e) => setTosAccepted(e.target.checked)}
+            onChange={(e) => {
+              setTosAccepted(e.target.checked);
+              if (e.target.checked) setTosHighlight(false);
+            }}
             disabled={loading}
             style={{
               accentColor: '#355ce9',
@@ -289,6 +325,9 @@ export const SignupForm: React.FC = () => {
               marginTop: '2px',
               flexShrink: 0,
               cursor: 'pointer',
+              outline: tosHighlight ? '2px solid #ef4444' : 'none',
+              outlineOffset: '2px',
+              transition: 'outline 0.2s',
             }}
           />
           <span>
@@ -325,6 +364,16 @@ export const SignupForm: React.FC = () => {
         <div className="auth-footer">
           Already have an account?
           <Link to="/login" className="auth-link">Sign In</Link>
+          <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-tertiary)', lineHeight: '1.5' }}>
+            By continuing, you agree to our{' '}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="auth-link" style={{ marginLeft: 0 }}>
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="auth-link" style={{ marginLeft: 0 }}>
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </form>
     </div>
