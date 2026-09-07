@@ -9,6 +9,8 @@
  *  5. When user logs in, auth.store syncs the consent from anonymous → profile.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../../lib/supabase';
+import { getStoredAnonId } from '../../lib/fingerprint';
 import styles from './CookieConsent.module.css';
 
 const CONSENT_KEY = 'sreeai_cookie_consent';
@@ -71,6 +73,32 @@ export function getStoredConsentTimestamp(): string | null {
     }
 }
 
+/**
+ * Sync cookie consent decision to the anonymous_users DB table.
+ * Uses a SECURITY DEFINER RPC function because the anonymous_users
+ * table only allows service_role access via RLS. The RPC safely
+ * scopes the update to just cookie_consent fields.
+ */
+function syncConsentToAnonymousDB(accepted: boolean, timestamp: string) {
+    try {
+        const anonId = getStoredAnonId();
+        if (!anonId) return; // Not anonymous or no anon ID yet
+
+        supabase
+            .rpc('update_anonymous_cookie_consent', {
+                p_anon_id: anonId,
+                p_cookie_consent: accepted,
+                p_cookie_consent_at: timestamp,
+            })
+            .then(({ error }) => {
+                if (error) console.warn('[CookieConsent] Failed to sync consent to anonymous_users:', error);
+                else console.log('[CookieConsent] Consent synced to anonymous_users table');
+            });
+    } catch (e) {
+        console.warn('[CookieConsent] Error syncing consent to DB:', e);
+    }
+}
+
 interface CookieConsentProps {
     /** Called when the user makes a consent decision */
     onConsent: (accepted: boolean) => void;
@@ -91,7 +119,10 @@ export default function CookieConsent({ onConsent }: CookieConsentProps) {
     const dismiss = useCallback((accepted: boolean) => {
         setExiting(true);
         const status = accepted ? 'accepted' : 'declined';
-        storeConsent(status);
+        const timestamp = storeConsent(status);
+
+        // Sync to anonymous_users DB table
+        syncConsentToAnonymousDB(accepted, timestamp);
 
         // Wait for exit animation before removing from DOM
         setTimeout(() => {
@@ -111,6 +142,10 @@ export default function CookieConsent({ onConsent }: CookieConsentProps) {
                     We use cookies and analytics to improve your experience, track errors,
                     and understand how you use Sree AI. Your data helps us build a better product.
                     {' '}
+                    <a href="/cookies" target="_blank" rel="noopener noreferrer">
+                        Cookie Policy
+                    </a>
+                    {' '}and{' '}
                     <a href="/privacy" target="_blank" rel="noopener noreferrer">
                         Privacy Policy
                     </a>
