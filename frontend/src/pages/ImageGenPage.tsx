@@ -217,8 +217,13 @@ const ImageGenPage: React.FC = () => {
     if (imageModels.length > 0 && !settings.modelId) {
       const accessibleModels = imageModels.filter(m => canAccess(m.tier_required));
       const candidates = accessibleModels.length > 0 ? accessibleModels : imageModels;
-      const fast = candidates.find(m => m.is_fast) || candidates[0];
-      updateSettings({ modelId: fast.model_id });
+      //flux.2 klein is now default image model 09/09/2026
+      const defaultModel = candidates.find(m => m.name.includes('FLUX.2') && m.name.toLowerCase().includes('klein'))
+        || candidates.find(m => m.name.includes('FLUX'))
+        || candidates.find(m => m.is_fast)
+        || candidates[0];
+
+      updateSettings({ modelId: defaultModel.model_id });
     }
   }, [imageModels, settings.modelId, updateSettings, canAccess]);
 
@@ -748,7 +753,7 @@ const ImageGenPage: React.FC = () => {
                       </>
                     )}
                   </div>
-                  
+
                   {/* Cost per Image indicator with premium savings badge */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px', marginTop: '12px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
