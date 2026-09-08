@@ -68,35 +68,28 @@ export const SignupForm: React.FC = () => {
     try {
       localStorage.setItem('last_login_method', 'email');
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // Store TOS acceptance intent BEFORE signUp() — same pattern as OAuth.
+      //
+      // WHY: With email confirmation ON, signUp() returns NO session.
+      // The user is unauthenticated until they click the verification link.
+      // Any immediate DB update would be blocked by RLS (auth.uid() is null).
+      //
+      // When the user clicks the link and returns, runSignInTasks() in auth.store.ts
+      // picks up this flag, uses the now-valid session, and writes TOS to the DB.
+      const now = new Date().toISOString();
+      localStorage.setItem('pending_tos_accepted', 'true');
+      localStorage.setItem('pending_tos_accepted_at', now);
+
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
 
-      if (signUpError) throw signUpError;
-
-      // Save TOS & Privacy acceptance to profile.
-      // IMPORTANT: Supabase creates the profile row via a DB trigger AFTER signUp() returns.
-      // We must retry the update until the row exists (trigger latency is ~100-800ms).
-      if (data?.user?.id) {
-        const now = new Date().toISOString();
-        const userId = data.user.id;
-        let saved = false;
-        for (let attempt = 0; attempt < 5; attempt++) {
-          if (attempt > 0) await new Promise(r => setTimeout(r, 600));
-          const { error: tosError } = await supabase
-            .from('profiles')
-            .update({
-              tos_accepted: true,
-              tos_accepted_at: now,
-              privacy_accepted: true,
-              privacy_accepted_at: now,
-            })
-            .eq('id', userId)
-            .eq('tos_accepted', false); // only update if not already accepted
-          if (!tosError) { saved = true; break; }
-        }
-        if (!saved) console.warn('[SignupForm] Could not write TOS acceptance after retries.');
+      if (signUpError) {
+        // Clean up the flag if signup itself failed — don't leave a stale flag
+        localStorage.removeItem('pending_tos_accepted');
+        localStorage.removeItem('pending_tos_accepted_at');
+        throw signUpError;
       }
 
       setSuccess(true);
