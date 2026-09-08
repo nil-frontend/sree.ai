@@ -523,7 +523,7 @@ export const FeatureRequestPage: React.FC = () => {
                       {isUploadingScreenshot ? (
                         <div className={styles.uploadingContainer}>
                           <Loader2 size={18} className={styles.spinner} />
-                          <span>Uploading screenshot to Cloudflare R2 bucket...</span>
+                          <span>Uploading screenshot Just a Second...</span>
                         </div>
                       ) : screenshotPreview ? (
                         <div className={styles.screenshotPreviewCard}>
@@ -690,16 +690,27 @@ export const FeatureRequestPage: React.FC = () => {
                   type="submit"
                   disabled={
                     isSubmitting ||
+                    isUploadingScreenshot ||
                     !rateLimitStatus.isAllowed ||
                     !title.trim() ||
                     !description.trim()
                   }
-                  className={`${styles.submitBtn} ${!rateLimitStatus.isAllowed ? styles.submitBtnCooldown : ''}`}
+                  className={`${styles.submitBtn} ${!rateLimitStatus.isAllowed
+                    ? styles.submitBtnCooldown
+                    : isUploadingScreenshot
+                      ? styles.submitBtnUploading
+                      : ''
+                    }`}
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 size={18} className={styles.spinner} />
                       <span>Transmitting to Pipeline...</span>
+                    </>
+                  ) : isUploadingScreenshot ? (
+                    <>
+                      <Loader2 size={18} className={styles.spinner} />
+                      <span>Uploading Screenshot (Please wait)...</span>
                     </>
                   ) : !rateLimitStatus.isAllowed ? (
                     <>
@@ -713,7 +724,7 @@ export const FeatureRequestPage: React.FC = () => {
                   ) : (
                     <>
                       <Send size={18} />
-                      <span>Submit Feature Request</span>
+                      <span>{isBugReport ? 'Submit Bug Report' : 'Submit Feature Request'}</span>
                     </>
                   )}
                 </button>

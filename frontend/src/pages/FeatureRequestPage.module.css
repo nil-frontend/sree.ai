@@ -496,6 +496,14 @@
   box-shadow: none !important;
 }
 
+.submitBtnUploading {
+  background: rgba(59, 130, 246, 0.18) !important;
+  color: #93C5FD !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+
 .submitFooterRow {
   display: flex;
   align-items: center;
